@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { ArrowLeft, TrendingUp } from 'lucide-react-native';
 import Svg, { Line, Path, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 
@@ -7,51 +7,50 @@ export const ProgressScreen = ({ setActiveTab }) => {
   const [period, setPeriod] = useState('Semana');
 
   return (
-    <View className="flex-1 pt-2 relative">
-      <View className="flex-row items-center mb-6 relative px-6">
+    <View style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => setActiveTab('dashboard')}
-          className="p-2 rounded-full absolute left-6"
-          style={{ minHeight: 44, minWidth: 44 }}
+          style={styles.backButton}
         >
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-slate-900 w-full text-center">Mi Progreso</Text>
+        <Text style={styles.title}>Mi Progreso</Text>
+        <View style={{ width: 40 }} />
       </View>
 
-      <View className="bg-slate-100 p-1 rounded-xl flex-row mb-6 mx-8">
+      <View style={styles.filterContainer}>
         {['Semana', 'Mes', '6 Meses', 'Año'].map((p) => (
           <TouchableOpacity
             key={p}
             onPress={() => setPeriod(p)}
-            className={`flex-1 py-1.5 rounded-lg ${period === p ? 'bg-white shadow-sm' : ''}`}
-            style={{ minHeight: 44 }}
+            style={[styles.filterButton, period === p && styles.filterButtonActive]}
           >
-            <Text className={`text-xs font-bold text-center ${period === p ? 'text-slate-900' : 'text-slate-400'}`}>
+            <Text style={[styles.filterText, period === p ? styles.filterTextActive : styles.filterTextInactive]}>
               {p}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 100 }}>
-        <View className="bg-white p-5 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-50 mb-8 relative overflow-hidden">
-          <View className="flex-row justify-between items-start mb-6">
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.chartCard}>
+          <View style={styles.chartHeader}>
             <View>
-              <Text className="text-slate-400 font-medium text-sm">Peso Total Levantado</Text>
-              <View className="flex-row items-baseline mt-1">
-                <Text className="text-3xl font-bold text-slate-900">15,450 </Text>
-                <Text className="text-lg text-slate-400 font-medium">kg</Text>
+              <Text style={styles.chartLabel}>Peso Total Levantado</Text>
+              <View style={styles.chartValueRow}>
+                <Text style={styles.chartValue}>15,450 </Text>
+                <Text style={styles.chartUnit}>kg</Text>
               </View>
             </View>
-            <View className="bg-blue-50 px-2 py-1 rounded-lg flex-row items-center gap-1">
+            <View style={styles.badge}>
               <TrendingUp size={12} color="#3b82f6" />
-              <Text className="text-blue-500 text-xs font-bold">+12.5%</Text>
+              <Text style={styles.badgeText}>+12.5%</Text>
             </View>
           </View>
 
-          <View style={{ height: 192 }}>
-            <Svg viewBox="0 0 350 150" style={{ width: '100%', height: '100%' }}>
+          <View style={styles.chartContainer}>
+            <Svg viewBox="0 0 350 150" style={styles.svg}>
               <Defs>
                 <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                   <Stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
@@ -79,14 +78,14 @@ export const ProgressScreen = ({ setActiveTab }) => {
             </Svg>
           </View>
 
-          <View className="flex-row justify-between mt-2 px-2">
-            <Text className="text-xs text-slate-400 font-medium">L</Text>
-            <Text className="text-xs text-slate-400 font-medium">M</Text>
-            <Text className="text-xs text-slate-400 font-medium">X</Text>
-            <Text className="text-xs text-slate-400 font-medium">J</Text>
-            <Text className="text-xs text-slate-400 font-medium">V</Text>
-            <Text className="text-xs text-slate-400 font-medium">S</Text>
-            <Text className="text-xs text-slate-400 font-medium">D</Text>
+          <View style={styles.chartLabels}>
+            <Text style={styles.chartLabelText}>L</Text>
+            <Text style={styles.chartLabelText}>M</Text>
+            <Text style={styles.chartLabelText}>X</Text>
+            <Text style={styles.chartLabelText}>J</Text>
+            <Text style={styles.chartLabelText}>V</Text>
+            <Text style={styles.chartLabelText}>S</Text>
+            <Text style={styles.chartLabelText}>D</Text>
           </View>
         </View>
       </ScrollView>
@@ -94,3 +93,142 @@ export const ProgressScreen = ({ setActiveTab }) => {
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 24,
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    textAlign: 'center',
+  },
+  filterContainer: {
+    backgroundColor: '#f1f5f9',
+    padding: 4,
+    borderRadius: 12,
+    flexDirection: 'row',
+    marginBottom: 24,
+    marginHorizontal: 32,
+  },
+  filterButton: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  filterButtonActive: {
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  filterText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  filterTextActive: {
+    color: '#1e293b',
+  },
+  filterTextInactive: {
+    color: '#94a3b8',
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  chartCard: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#f8fafc',
+    marginBottom: 32,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  chartLabel: {
+    color: '#94a3b8',
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  chartValueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: 4,
+  },
+  chartValue: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  chartUnit: {
+    fontSize: 18,
+    color: '#94a3b8',
+    fontWeight: '500',
+  },
+  badge: {
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  badgeText: {
+    color: '#3b82f6',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  chartContainer: {
+    height: 192,
+  },
+  svg: {
+    width: '100%',
+    height: '100%',
+  },
+  chartLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingHorizontal: 8,
+  },
+  chartLabelText: {
+    fontSize: 12,
+    color: '#94a3b8',
+    fontWeight: '500',
+  },
+});

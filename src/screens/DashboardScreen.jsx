@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet } from 'react-native';
 import { Dumbbell, Play, Flame, Timer, Check, Pause, Calendar } from 'lucide-react-native';
 
 export const DashboardScreen = ({ user, startNewWorkout }) => {
@@ -23,108 +23,105 @@ export const DashboardScreen = ({ user, startNewWorkout }) => {
   const todayRoutine = getTodayRoutine();
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
-      <View className="px-6 space-y-6">
-        <View className="flex-row justify-between items-center">
-          <Text className="text-2xl font-bold text-slate-900">Hola, {user.name.split(' ')[0]}!</Text>
-          <View className="h-9 w-9 bg-slate-200 rounded-full items-center justify-center overflow-hidden border border-slate-300">
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Hola, {user.name.split(' ')[0]}!</Text>
+          <View style={styles.avatarContainer}>
             <Image 
               source={{ uri: `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.name}` }} 
-              style={{ width: 36, height: 36 }}
+              style={styles.avatar}
             />
           </View>
         </View>
 
         {/* HERO CARD */}
-        <View className="bg-slate-900 p-5 rounded-[2rem] border border-slate-800 relative overflow-hidden shadow-xl shadow-slate-200">
-          <View className="relative z-10">
-            <View className="flex-row justify-between items-start mb-4">
+        <View style={styles.heroCard}>
+          <View style={styles.heroContent}>
+            <View style={styles.heroHeader}>
               <View>
-                <View className="flex-row items-center gap-1 mb-1">
+                <View style={styles.dayBadge}>
                   <Calendar size={12} color="#60a5fa" />
-                  <Text className="text-blue-400 font-bold text-xs uppercase tracking-wider">
-                    {todayRoutine.day}
-                  </Text>
+                  <Text style={styles.dayText}>{todayRoutine.day.toUpperCase()}</Text>
                 </View>
-                <Text className="text-2xl font-bold text-white leading-tight">{todayRoutine.name}</Text>
+                <Text style={styles.heroTitle}>{todayRoutine.name}</Text>
               </View>
               {todayRoutine.type === 'Rest' ? (
-                <View className="bg-slate-800 p-2 rounded-xl">
+                <View style={styles.iconRestContainer}>
                   <Pause color="#94a3b8" size={24} />
                 </View>
               ) : (
-                <View className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-900/50">
+                <View style={styles.iconActiveContainer}>
                   <Dumbbell color="white" size={24} />
                 </View>
               )}
             </View>
             {todayRoutine.type === 'Rest' ? (
-              <View className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
-                <Text className="text-slate-300 text-sm font-medium">
+              <View style={styles.restMessage}>
+                <Text style={styles.restText}>
                   ¡Hoy toca recuperar! Estira o camina ligero.
                 </Text>
               </View>
             ) : (
               <TouchableOpacity 
                 onPress={() => startNewWorkout(todayRoutine.type)}
-                className="w-full bg-white py-3.5 rounded-xl shadow-lg flex-row items-center justify-center gap-2"
-                style={{ minHeight: 56 }}
+                style={styles.startButton}
               >
                 <Play size={20} color="#2563eb" fill="#2563eb" />
-                <Text className="text-slate-900 font-bold">Empezar Rutina Ahora</Text>
+                <Text style={styles.startButtonText}>Empezar Rutina Ahora</Text>
               </TouchableOpacity>
             )}
           </View>
         </View>
 
         {/* RESUMEN SEMANAL */}
-        <View>
-          <Text className="font-bold text-lg text-slate-900 mb-4">Resumen Semanal</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            <View className="items-center gap-2" style={{ minWidth: 60 }}>
-              <Text className="text-xs font-bold text-slate-500 uppercase">Lun</Text>
-              <View className="w-12 h-12 rounded-full bg-blue-50 border-2 border-blue-500 items-center justify-center shadow-sm">
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Resumen Semanal</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weeklyContainer}>
+            <View style={styles.dayItem}>
+              <Text style={styles.dayLabel}>LUN</Text>
+              <View style={[styles.dayCircle, styles.dayCircleCompleted]}>
                 <Check size={20} strokeWidth={3} color="#3b82f6" />
               </View>
-              <Text className="text-xs font-bold text-slate-900">50 min</Text>
+              <Text style={styles.dayTime}>50 min</Text>
             </View>
-            <View className="items-center gap-2" style={{ minWidth: 60 }}>
-              <Text className="text-xs font-bold text-slate-500 uppercase">Mar</Text>
-              <View className="w-12 h-12 rounded-full bg-slate-50 border-2 border-dashed border-slate-300 items-center justify-center">
+            <View style={styles.dayItem}>
+              <Text style={styles.dayLabel}>MAR</Text>
+              <View style={[styles.dayCircle, styles.dayCircleRest]}>
                 <Pause size={20} color="#cbd5e1" fill="#cbd5e1" />
               </View>
-              <Text className="text-xs font-bold text-slate-400">Descanso</Text>
+              <Text style={styles.dayTimeRest}>Descanso</Text>
             </View>
-            <View className="items-center gap-2" style={{ minWidth: 60 }}>
-              <Text className="text-xs font-bold text-slate-500 uppercase">Mié</Text>
-              <View className="w-12 h-12 rounded-full bg-blue-50 border-2 border-blue-500 items-center justify-center shadow-sm">
+            <View style={styles.dayItem}>
+              <Text style={styles.dayLabel}>MIÉ</Text>
+              <View style={[styles.dayCircle, styles.dayCircleCompleted]}>
                 <Check size={20} strokeWidth={3} color="#3b82f6" />
               </View>
-              <Text className="text-xs font-bold text-slate-900">45 min</Text>
+              <Text style={styles.dayTime}>45 min</Text>
             </View>
-            <View className="items-center gap-2 opacity-40" style={{ minWidth: 60 }}>
-              <Text className="text-xs font-bold text-slate-400 uppercase">Jue</Text>
-              <View className="w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-200" />
-              <Text className="text-xs font-bold text-slate-400">-</Text>
+            <View style={[styles.dayItem, { opacity: 0.4 }]}>
+              <Text style={styles.dayLabelInactive}>JUE</Text>
+              <View style={styles.dayCircleInactive} />
+              <Text style={styles.dayTimeInactive}>-</Text>
             </View>
           </ScrollView>
         </View>
 
         {/* STATS ROW */}
-        <View className="flex-row gap-4">
-          <View className="flex-1 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-            <View className="w-9 h-9 rounded-full bg-orange-50 items-center justify-center mb-2">
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <View style={styles.statIconOrange}>
               <Flame size={18} color="#f97316" fill="#f97316" />
             </View>
-            <Text className="text-2xl font-bold text-slate-900">325</Text>
-            <Text className="text-xs font-semibold text-slate-500 leading-tight">Calorías{'\n'}quemadas</Text>
+            <Text style={styles.statValue}>325</Text>
+            <Text style={styles.statLabel}>Calorías{'\n'}quemadas</Text>
           </View>
-          <View className="flex-1 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-            <View className="w-9 h-9 rounded-full bg-green-50 items-center justify-center mb-2">
+          <View style={styles.statCard}>
+            <View style={styles.statIconGreen}>
               <Timer size={18} color="#16a34a" strokeWidth={2.5} />
             </View>
-            <Text className="text-2xl font-bold text-slate-900">48 min</Text>
-            <Text className="text-xs font-semibold text-slate-500 leading-tight">Tiempo de{'\n'}entreno</Text>
+            <Text style={styles.statValue}>48 min</Text>
+            <Text style={styles.statLabel}>Tiempo de{'\n'}entreno</Text>
           </View>
         </View>
       </View>
@@ -132,3 +129,253 @@ export const DashboardScreen = ({ user, startNewWorkout }) => {
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 100,
+    paddingTop: 8,
+  },
+  content: {
+    paddingHorizontal: 24,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  avatarContainer: {
+    height: 36,
+    width: 36,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+  },
+  heroCard: {
+    backgroundColor: '#0f172a',
+    padding: 20,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: '#1e293b',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    marginBottom: 24,
+  },
+  heroContent: {
+    position: 'relative',
+    zIndex: 10,
+  },
+  heroHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  dayBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  dayText: {
+    color: '#60a5fa',
+    fontWeight: 'bold',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    lineHeight: 28,
+  },
+  iconRestContainer: {
+    backgroundColor: '#1e293b',
+    padding: 8,
+    borderRadius: 12,
+  },
+  iconActiveContainer: {
+    backgroundColor: '#2563eb',
+    padding: 8,
+    borderRadius: 12,
+    shadowColor: '#1e40af',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  restMessage: {
+    backgroundColor: 'rgba(30, 41, 59, 0.5)',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+  },
+  restText: {
+    color: '#cbd5e1',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  startButton: {
+    width: '100%',
+    backgroundColor: 'white',
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 56,
+  },
+  startButtonText: {
+    color: '#0f172a',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#1e293b',
+    marginBottom: 16,
+  },
+  weeklyContainer: {
+    gap: 8,
+  },
+  dayItem: {
+    alignItems: 'center',
+    gap: 8,
+    minWidth: 60,
+  },
+  dayLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#64748b',
+    textTransform: 'uppercase',
+  },
+  dayLabelInactive: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#94a3b8',
+    textTransform: 'uppercase',
+  },
+  dayCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayCircleCompleted: {
+    backgroundColor: '#dbeafe',
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  dayCircleRest: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#cbd5e1',
+    borderStyle: 'dashed',
+  },
+  dayCircleInactive: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+  },
+  dayTime: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  dayTimeRest: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#94a3b8',
+  },
+  dayTimeInactive: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#94a3b8',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  statIconOrange: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fed7aa',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  statIconGreen: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#bbf7d0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+    lineHeight: 16,
+  },
+});

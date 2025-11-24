@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Text } from 'react-native';
+import { View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Home, Dumbbell, BarChart3, User, Sparkles } from 'lucide-react-native';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
@@ -9,7 +9,6 @@ import { ProgressScreen } from './src/screens/ProgressScreen';
 import { AICoachScreen } from './src/screens/AICoachScreen';
 import { EXERCISE_DB } from './src/data/exerciseDB';
 import { NavItem } from './src/components/common/NavItem';
-import './global.css';
 
 export default function App() {
   // --- ESTADOS DE AUTENTICACIÓN ---
@@ -60,7 +59,7 @@ export default function App() {
     >
       <StatusBar barStyle="dark-content" backgroundColor="#FAFAFA" />
       
-      <View className="flex-1">
+      <View style={{ flex: 1 }}>
         {!user ? (
           <AuthScreen setUser={setUser} />
         ) : (
@@ -78,8 +77,8 @@ export default function App() {
             {activeTab === 'progress' && <ProgressScreen setActiveTab={setActiveTab} />}
             {activeTab === 'ai-coach' && <AICoachScreen user={user} />}
             {activeTab === 'profile' && (
-              <View className="pt-10 items-center">
-                <Text className="text-center text-slate-400">Configuración de Perfil</Text>
+              <View style={{ paddingTop: 40, alignItems: 'center' }}>
+                <Text style={{ textAlign: 'center', color: '#94a3b8' }}>Configuración de Perfil</Text>
               </View>
             )}
           </>
@@ -88,20 +87,42 @@ export default function App() {
 
       {user && (
         <View 
-          className="absolute bottom-0 w-full bg-white border-t border-slate-100 flex-row justify-between items-center px-2"
-          style={{ height: 80, paddingBottom: 16 }}
+          style={{ 
+            position: 'absolute', 
+            bottom: 0, 
+            width: '100%', 
+            backgroundColor: 'white', 
+            borderTopWidth: 1, 
+            borderTopColor: '#e2e8f0', 
+            flexDirection: 'row', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            paddingHorizontal: 8,
+            height: 80,
+            paddingBottom: 16
+          }}
         >
           <NavItem icon={Home} label="Inicio" id="dashboard" activeTab={activeTab} onPress={handleNavPress} />
           <NavItem icon={Dumbbell} label="Rutinas" id="library" activeTab={activeTab} onPress={handleNavPress} />
           
           <TouchableOpacity 
             onPress={() => setActiveTab('ai-coach')}
-            className="flex flex-col items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl w-14 h-14 shadow-lg shadow-indigo-300"
             style={{ 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              backgroundColor: '#2563eb', 
+              borderRadius: 16, 
+              width: 56, 
+              height: 56, 
+              marginTop: -32,
               minHeight: 56, 
               minWidth: 56,
-              marginTop: -32,
-              backgroundColor: '#2563eb'
+              shadowColor: '#6366f1',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
             }}
           >
             <Sparkles size={24} color="white" fill="white" />
