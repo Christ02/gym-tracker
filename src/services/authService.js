@@ -99,10 +99,10 @@ export const authService = {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Cambiado de .single() a .maybeSingle() para manejar 0 filas
 
       if (error) throw error;
-      return data;
+      return data; // Puede ser null si no existe el perfil
     } catch (error) {
       console.error('Get User Profile Error:', error);
       return null;
