@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Check } from 'lucide-react-native';
 
-export const SetRow = ({ index, prev, weight, reps, isCompleted }) => {
-  const [completed, setCompleted] = useState(isCompleted);
-  
+export const SetRow = ({ index, prev, weight, reps, isCompleted, onWeightChange, onRepsChange, onToggleComplete }) => {
   return (
-    <View style={[styles.container, { opacity: completed ? 0.5 : 1 }]}>
+    <View style={[styles.container, { opacity: isCompleted ? 0.5 : 1 }]}>
       <View style={styles.indexCell}>
         <Text style={styles.indexText}>{index + 1}</Text>
       </View>
@@ -16,25 +14,31 @@ export const SetRow = ({ index, prev, weight, reps, isCompleted }) => {
       <View style={styles.inputCell}>
         <TextInput 
           keyboardType="numeric"
-          placeholder={weight} 
-          style={[styles.textInput, completed && styles.completedInput]}
+          value={weight}
+          onChangeText={onWeightChange}
+          placeholder="kg"
+          style={[styles.textInput, isCompleted && styles.completedInput]}
           placeholderTextColor="#64748b"
+          editable={!isCompleted}
         />
       </View>
       <View style={styles.inputCell}>
         <TextInput 
           keyboardType="numeric"
-          placeholder={reps} 
-          style={[styles.textInput, completed && styles.completedInput]}
+          value={reps}
+          onChangeText={onRepsChange}
+          placeholder="0"
+          style={[styles.textInput, isCompleted && styles.completedInput]}
           placeholderTextColor="#64748b"
+          editable={!isCompleted}
         />
       </View>
       <View style={styles.checkCell}>
         <TouchableOpacity 
-          onPress={() => setCompleted(!completed)}
-          style={[styles.checkButton, completed ? styles.checkButtonActive : styles.checkButtonInactive]}
+          onPress={onToggleComplete}
+          style={[styles.checkButton, isCompleted ? styles.checkButtonActive : styles.checkButtonInactive]}
         >
-          <Check size={18} strokeWidth={3} color={completed ? 'white' : '#94a3b8'} />
+          <Check size={18} strokeWidth={3} color={isCompleted ? 'white' : '#94a3b8'} />
         </TouchableOpacity>
       </View>
     </View>

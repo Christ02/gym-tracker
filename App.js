@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { Home, Dumbbell, BarChart3, User, Sparkles } from 'lucide-react-native';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
@@ -11,11 +11,15 @@ import { AICoachScreen } from './src/screens/AICoachScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { EXERCISE_DB } from './src/data/exerciseDB';
 import { NavItem } from './src/components/common/NavItem';
+import { authService } from './src/services/authService';
+import { supabase } from './src/services/supabase';
 
 export default function App() {
   // --- ESTADOS DE AUTENTICACIÓN ---
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   // --- ESTADOS DE LA APP ---
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -26,6 +30,41 @@ export default function App() {
     streak: 5,
     bestLift: '100kg (Banca)'
   });
+
+  // --- EFECTO: LISTENER DE AUTENTICACIÓN ---
+  useEffect(() => {
+    // Verificar sesión actual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        loadUserProfile(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    // Listener de cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        loadUserProfile(session.user.id);
+      } else {
+        setUser(null);
+        setUserProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Cargar perfil del usuario
+  const loadUserProfile = async (userId) => {
+    try {
+      const profile = await authService.getUserProfile(userId);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
 
   // --- LÓGICA ---
   const startNewWorkout = (type = 'Pecho') => {
@@ -52,6 +91,16 @@ export default function App() {
     }
   };
 
+  // Mostrar loading mientras verifica la sesión
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={{ marginTop: 16, color: '#64748b', fontSize: 16 }}>Cargando...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView 
       style={{ 
@@ -69,22 +118,23 @@ export default function App() {
             // Aquí puedes guardar los datos del onboarding
           }} />
         ) : !user ? (
-          <AuthScreen setUser={setUser} />
+          <AuthScreen />
         ) : (
           <>
-            {activeTab === 'dashboard' && <DashboardScreen user={user} startNewWorkout={startNewWorkout} />}
+            {activeTab === 'dashboard' && <DashboardScreen user={userProfile || user} startNewWorkout={startNewWorkout} />}
             {activeTab === 'workout' && activeWorkout && (
               <ActiveWorkoutScreen 
                 activeWorkout={activeWorkout} 
                 setActiveTab={setActiveTab}
                 setActiveWorkout={setActiveWorkout}
                 setStats={setStats}
+                user={user}
               />
             )}
-            {activeTab === 'library' && <MyRoutinesScreen startNewWorkout={startNewWorkout} />}
-            {activeTab === 'progress' && <ProgressScreen setActiveTab={setActiveTab} />}
-            {activeTab === 'ai-coach' && <AICoachScreen user={user} />}
-            {activeTab === 'profile' && <ProfileScreen user={user} setUser={setUser} />}
+            {activeTab === 'library' && <MyRoutinesScreen startNewWorkout={startNewWorkout} user={user} />}
+            {activeTab === 'progress' && <ProgressScreen setActiveTab={setActiveTab} user={user} />}
+            {activeTab === 'ai-coach' && <AICoachScreen user={userProfile || user} />}
+            {activeTab === 'profile' && <ProfileScreen user={userProfile || user} />}
           </>
         )}
       </View>

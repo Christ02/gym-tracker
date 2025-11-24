@@ -1,29 +1,108 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Search, Pencil, Trash2, Plus } from 'lucide-react-native';
-import { MY_ROUTINES } from '../data/routines';
+import { routineService } from '../services/routineService';
 
-export const MyRoutinesScreen = ({ startNewWorkout }) => {
-  const renderRoutineItem = ({ item }) => (
-    <TouchableOpacity 
-      onPress={() => startNewWorkout('Pecho')}
-      style={styles.routineCard}
-    >
-      <View>
-        <Text style={styles.routineName}>{item.name}</Text>
-        <Text style={styles.routineCount}>{item.count}</Text>
+export const MyRoutinesScreen = ({ startNewWorkout, user }) => {
+  const [routines, setRoutines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Cargar rutinas al montar el componente
+  useEffect(() => {
+    loadRoutines();
+  }, []);
+
+  const loadRoutines = async () => {
+    try {
+      setLoading(true);
+      const data = await routineService.getUserRoutines(user.id);
+      setRoutines(data);
+    } catch (error) {
+      console.error('Error loading routines:', error);
+      Alert.alert('Error', 'No se pudieron cargar las rutinas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadRoutines();
+    setRefreshing(false);
+  };
+
+  const handleDeleteRoutine = (routineId, routineName) => {
+    Alert.alert(
+      'Eliminar Rutina',
+      `¿Estás seguro que deseas eliminar "${routineName}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await routineService.deleteRoutine(routineId);
+              setRoutines(prev => prev.filter(r => r.id !== routineId));
+              Alert.alert('Éxito', 'Rutina eliminada correctamente');
+            } catch (error) {
+              console.error('Error deleting routine:', error);
+              Alert.alert('Error', 'No se pudo eliminar la rutina');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleStartRoutine = (routine) => {
+    // Aquí podrías iniciar un entrenamiento basado en la rutina
+    Alert.alert('Próximamente', 'Función de iniciar rutina en desarrollo');
+  };
+
+  const renderRoutineItem = ({ item }) => {
+    const exerciseCount = item.exercises ? item.exercises.length : 0;
+    
+    return (
+      <TouchableOpacity 
+        onPress={() => handleStartRoutine(item)}
+        style={styles.routineCard}
+      >
+        <View>
+          <Text style={styles.routineName}>{item.name}</Text>
+          <Text style={styles.routineCount}>{exerciseCount} ejercicios</Text>
+          {item.description && (
+            <Text style={styles.routineDescription}>{item.description}</Text>
+          )}
+        </View>
+        
+        <View style={styles.actions}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => Alert.alert('Próximamente', 'Función de edición en desarrollo')}
+          >
+            <Pencil size={18} color="#1e293b" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => handleDeleteRoutine(item.id, item.name)}
+          >
+            <Trash2 size={18} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  if (loading && !refreshing) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text style={styles.loadingText}>Cargando rutinas...</Text>
       </View>
-      
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Pencil size={18} color="#1e293b" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Trash2 size={18} color="#1e293b" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -34,16 +113,28 @@ export const MyRoutinesScreen = ({ startNewWorkout }) => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={MY_ROUTINES}
-        renderItem={renderRoutineItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      {routines.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No tienes rutinas guardadas</Text>
+          <Text style={styles.emptySubtitle}>Crea tu primera rutina tocando el botón +</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={routines}
+          renderItem={renderRoutineItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+        />
+      )}
 
       <View style={styles.fabContainer}>
-        <TouchableOpacity style={styles.fab}>
+        <TouchableOpacity 
+          style={styles.fab}
+          onPress={() => Alert.alert('Próximamente', 'Función de crear rutina en desarrollo')}
+        >
           <Plus size={32} color="white" />
         </TouchableOpacity>
       </View>
@@ -56,6 +147,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 8,
     position: 'relative',
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
   },
   header: {
     flexDirection: 'row',
@@ -108,6 +208,11 @@ const styles = StyleSheet.create({
     color: '#64748b',
     fontSize: 14,
   },
+  routineDescription: {
+    color: '#94a3b8',
+    fontSize: 12,
+    marginTop: 4,
+  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -120,6 +225,24 @@ const styles = StyleSheet.create({
     minWidth: 44,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
   },
   fabContainer: {
     position: 'absolute',

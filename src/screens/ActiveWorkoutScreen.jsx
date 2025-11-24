@@ -1,16 +1,114 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, Alert } from 'react-native';
 import { ArrowLeft, Clock, MoreVertical, Plus } from 'lucide-react-native';
 import { SetRow } from '../components/common/SetRow';
 import { RestTimer } from '../components/common/RestTimer';
+import { workoutService } from '../services/workoutService';
 
-export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWorkout, setStats }) => {
+export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWorkout, setStats, user }) => {
   const [showRestTimer, setShowRestTimer] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [exercisesData, setExercisesData] = useState(
+    activeWorkout.exercises.map(ex => ({
+      ...ex,
+      sets: [
+        { weight: '', reps: '', completed: false },
+        { weight: '', reps: '', completed: false },
+        { weight: '', reps: '', completed: false },
+      ]
+    }))
+  );
+
+  // Timer para el entrenamiento
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Formatear tiempo transcurrido
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Actualizar datos de un set
+  const updateSetData = (exerciseIndex, setIndex, field, value) => {
+    setExercisesData(prev => {
+      const newData = [...prev];
+      newData[exerciseIndex].sets[setIndex][field] = value;
+      return newData;
+    });
+  };
+
+  // Marcar set como completado
+  const toggleSetCompleted = (exerciseIndex, setIndex) => {
+    setExercisesData(prev => {
+      const newData = [...prev];
+      newData[exerciseIndex].sets[setIndex].completed = !newData[exerciseIndex].sets[setIndex].completed;
+      return newData;
+    });
+  };
+
+  // Añadir set a un ejercicio
+  const addSet = (exerciseIndex) => {
+    setExercisesData(prev => {
+      const newData = [...prev];
+      newData[exerciseIndex].sets.push({ weight: '', reps: '', completed: false });
+      return newData;
+    });
+  };
   
-  const handleFinish = () => {
-    setActiveWorkout(null);
-    setStats(prev => ({...prev, workoutsCompleted: prev.workoutsCompleted + 1}));
-    setActiveTab('dashboard');
+  const handleFinish = async () => {
+    // Calcular volumen total y calorías
+    let totalVolume = 0;
+    exercisesData.forEach(exercise => {
+      exercise.sets.forEach(set => {
+        if (set.completed && set.weight && set.reps) {
+          totalVolume += parseFloat(set.weight) * parseInt(set.reps);
+        }
+      });
+    });
+
+    const duration = Math.floor(elapsedTime / 60); // minutos
+    const calories = Math.floor(duration * 5); // Estimación simple
+
+    try {
+      // Guardar entrenamiento en Supabase
+      await workoutService.saveWorkout(user.id, {
+        title: activeWorkout.title || 'Entrenamiento',
+        date: new Date().toISOString(),
+        duration: duration,
+        exercises: exercisesData.map(ex => ({
+          name: ex.name,
+          type: ex.type,
+          sets: ex.sets.filter(s => s.completed) // Solo guardar sets completados
+        })),
+        volume: totalVolume,
+        calories: calories,
+        notes: '',
+      });
+
+      Alert.alert(
+        '¡Entrenamiento Guardado!',
+        `Duración: ${duration} min\nVolumen: ${totalVolume.toFixed(0)} kg\nCalorías: ${calories} kcal`,
+        [
+          { 
+            text: 'OK', 
+            onPress: () => {
+              setActiveWorkout(null);
+              setStats(prev => ({...prev, workoutsCompleted: prev.workoutsCompleted + 1}));
+              setActiveTab('dashboard');
+            } 
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      Alert.alert('Error', 'No se pudo guardar el entrenamiento. Intenta de nuevo.');
+    }
   };
 
   return (
@@ -23,10 +121,10 @@ export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWork
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Día 1: Pecho</Text>
+          <Text style={styles.headerTitle}>{activeWorkout.title || 'Entrenamiento'}</Text>
           <View style={styles.timerContainer}>
             <Clock size={12} color="#3b82f6" />
-            <Text style={styles.timerText}>45:12</Text>
+            <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
           </View>
         </View>
         <TouchableOpacity 
@@ -38,8 +136,8 @@ export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWork
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {activeWorkout.exercises.map((ex, index) => (
-          <View key={index} style={styles.exerciseCard}>
+        {exercisesData.map((ex, exerciseIndex) => (
+          <View key={exerciseIndex} style={styles.exerciseCard}>
             <View style={styles.exerciseHeader}>
               <View style={styles.exerciseImage}>
                 <Image 
@@ -66,9 +164,19 @@ export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWork
             </View>
 
             <View style={styles.setsContainer}>
-              <SetRow index={0} prev="80kg x 10" weight="80" reps="10" isCompleted={true} />
-              <SetRow index={1} prev="80kg x 10" weight="80" reps="10" isCompleted={false} />
-              <SetRow index={2} prev="80kg x 9" weight="80" reps="10" isCompleted={false} />
+              {ex.sets.map((set, setIndex) => (
+                <SetRow 
+                  key={setIndex}
+                  index={setIndex} 
+                  prev="-"
+                  weight={set.weight} 
+                  reps={set.reps} 
+                  isCompleted={set.completed}
+                  onWeightChange={(value) => updateSetData(exerciseIndex, setIndex, 'weight', value)}
+                  onRepsChange={(value) => updateSetData(exerciseIndex, setIndex, 'reps', value)}
+                  onToggleComplete={() => toggleSetCompleted(exerciseIndex, setIndex)}
+                />
+              ))}
             </View>
 
             {showRestTimer && (
@@ -81,7 +189,10 @@ export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWork
             )}
 
             <View style={styles.addSetContainer}>
-              <TouchableOpacity style={styles.addSetButton}>
+              <TouchableOpacity 
+                style={styles.addSetButton}
+                onPress={() => addSet(exerciseIndex)}
+              >
                 <Plus size={14} color="#3b82f6" />
                 <Text style={styles.addSetText}>Añadir Serie</Text>
               </TouchableOpacity>

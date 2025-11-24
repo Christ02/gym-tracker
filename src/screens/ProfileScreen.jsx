@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, Switch, Alert } from 'react-native';
 import { User, Settings, Award, Target, Bell, Moon, Globe, LogOut, ChevronRight, Edit } from 'lucide-react-native';
+import { authService } from '../services/authService';
 
-export const ProfileScreen = ({ user, setUser }) => {
+export const ProfileScreen = ({ user }) => {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -22,7 +23,26 @@ export const ProfileScreen = ({ user, setUser }) => {
   ];
 
   const handleLogout = () => {
-    setUser(null);
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro que deseas cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Cerrar Sesión', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await authService.signOut();
+              // El listener en App.js detectará el cambio automáticamente
+            } catch (error) {
+              console.error('Error logging out:', error);
+              Alert.alert('Error', 'No se pudo cerrar sesión. Intenta de nuevo.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Dumbbell, User, Mail, Lock, ArrowRight } from 'lucide-react-native';
+import { authService } from '../services/authService';
 
-export const AuthScreen = ({ setUser }) => {
+export const AuthScreen = () => {
   const [authMode, setAuthMode] = useState('login');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,12 +14,59 @@ export const AuthScreen = ({ setUser }) => {
     goal: 'muscle'
   });
 
-  const handleSubmit = () => {
-    setUser({
-      name: formData.name || 'Alex',
-      email: formData.email,
-      goal: formData.goal
-    });
+  const handleSubmit = async () => {
+    // Validaciones
+    if (!formData.email || !formData.password) {
+      Alert.alert('Error', 'Por favor completa todos los campos');
+      return;
+    }
+
+    if (authMode === 'signup' && !formData.name) {
+      Alert.alert('Error', 'Por favor ingresa tu nombre');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      if (authMode === 'signup') {
+        // Registrar nuevo usuario
+        await authService.signUp(formData.email, formData.password, {
+          name: formData.name,
+          goal: formData.goal,
+          age: formData.age ? parseInt(formData.age) : null,
+        });
+        Alert.alert(
+          '¡Éxito!', 
+          'Cuenta creada exitosamente. Revisa tu email para verificar tu cuenta.',
+          [{ text: 'OK', onPress: () => setAuthMode('login') }]
+        );
+      } else {
+        // Iniciar sesión
+        await authService.signIn(formData.email, formData.password);
+        // El listener en App.js detectará el cambio de sesión automáticamente
+      }
+    } catch (error) {
+      console.error('Auth Error:', error);
+      let errorMessage = 'Ocurrió un error. Intenta de nuevo.';
+      
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Email o contraseña incorrectos';
+      } else if (error.message.includes('User already registered')) {
+        errorMessage = 'Este email ya está registrado';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Por favor verifica tu email antes de iniciar sesión';
+      }
+      
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,11 +147,18 @@ export const AuthScreen = ({ setUser }) => {
           <TouchableOpacity 
             onPress={handleSubmit}
             style={styles.submitButton}
+            disabled={loading}
           >
-            <Text style={styles.submitButtonText}>
-              {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
-            </Text>
-            <ArrowRight size={18} color="white" />
+            {loading ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <>
+                <Text style={styles.submitButtonText}>
+                  {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+                </Text>
+                <ArrowRight size={18} color="white" />
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
