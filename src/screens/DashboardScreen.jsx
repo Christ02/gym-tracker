@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet } from 'react-native';
-import { Dumbbell, Play, Flame, Timer, Check, Pause, Calendar } from 'lucide-react-native';
+import { Dumbbell, Play, Flame, Timer, Check, Pause, Calendar, Award, Target } from 'lucide-react-native';
+import { WorkoutCalendar } from '../components/common/WorkoutCalendar';
+import { StatCard } from '../components/common/StatCard';
 
 export const DashboardScreen = ({ user, startNewWorkout }) => {
+  const [currentMonth] = useState(new Date());
+  const [completedDays] = useState([1, 3, 5, 10, 12, 15, 17]);
+  
   const getTodayRoutine = () => {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const today = new Date();
@@ -108,21 +113,51 @@ export const DashboardScreen = ({ user, startNewWorkout }) => {
         </View>
 
         {/* STATS ROW */}
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <View style={styles.statIconOrange}>
-              <Flame size={18} color="#f97316" fill="#f97316" />
-            </View>
-            <Text style={styles.statValue}>325</Text>
-            <Text style={styles.statLabel}>Calorías{'\n'}quemadas</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={styles.statIconGreen}>
-              <Timer size={18} color="#16a34a" strokeWidth={2.5} />
-            </View>
-            <Text style={styles.statValue}>48 min</Text>
-            <Text style={styles.statLabel}>Tiempo de{'\n'}entreno</Text>
-          </View>
+        <View style={styles.statsGrid}>
+          <StatCard 
+            title="Entrenamientos"
+            value="12"
+            icon={Dumbbell}
+            change="+3"
+            changeType="up"
+            color="#3b82f6"
+          />
+          <StatCard 
+            title="Récord Personal"
+            value="125"
+            unit="kg"
+            icon={Award}
+            change="+5kg"
+            changeType="up"
+            color="#8b5cf6"
+          />
+          <StatCard 
+            title="Calorías"
+            value="3.2K"
+            icon={Flame}
+            change="+12%"
+            changeType="up"
+            color="#f97316"
+          />
+          <StatCard 
+            title="Tiempo Total"
+            value="8.5"
+            unit="hrs"
+            icon={Timer}
+            change="+2.5h"
+            changeType="up"
+            color="#22c55e"
+          />
+        </View>
+
+        {/* CALENDARIO */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Calendario de Entrenamientos</Text>
+          <WorkoutCalendar 
+            currentMonth={currentMonth}
+            completedDays={completedDays}
+            onDayPress={(day) => console.log('Day pressed:', day)}
+          />
         </View>
       </View>
     </ScrollView>
@@ -134,7 +169,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 100,
+    paddingBottom: 120,
     paddingTop: 8,
   },
   content: {
@@ -332,50 +367,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#94a3b8',
   },
-  statsRow: {
+  statsGrid: {
     flexDirection: 'row',
-    gap: 16,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-  },
-  statIconOrange: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#fed7aa',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  statIconGreen: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#bbf7d0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  statLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#64748b',
-    lineHeight: 16,
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 24,
   },
 });

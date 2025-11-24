@@ -19,18 +19,15 @@ export const NavItem = ({ icon: Icon, label, id, activeTab, onPress }) => (
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    width: '100%',
-    height: '100%',
-    minHeight: 44,
-    minWidth: 44,
+    paddingVertical: 8,
+    minWidth: 70,
   },
   label: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '500',
+    marginTop: 4,
   },
   labelActive: {
     color: '#2563eb',

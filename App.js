@@ -7,6 +7,7 @@ import { ActiveWorkoutScreen } from './src/screens/ActiveWorkoutScreen';
 import { MyRoutinesScreen } from './src/screens/MyRoutinesScreen';
 import { ProgressScreen } from './src/screens/ProgressScreen';
 import { AICoachScreen } from './src/screens/AICoachScreen';
+import { ProfileScreen } from './src/screens/ProfileScreen';
 import { EXERCISE_DB } from './src/data/exerciseDB';
 import { NavItem } from './src/components/common/NavItem';
 
@@ -76,11 +77,7 @@ export default function App() {
             {activeTab === 'library' && <MyRoutinesScreen startNewWorkout={startNewWorkout} />}
             {activeTab === 'progress' && <ProgressScreen setActiveTab={setActiveTab} />}
             {activeTab === 'ai-coach' && <AICoachScreen user={user} />}
-            {activeTab === 'profile' && (
-              <View style={{ paddingTop: 40, alignItems: 'center' }}>
-                <Text style={{ textAlign: 'center', color: '#94a3b8' }}>Configuración de Perfil</Text>
-              </View>
-            )}
+            {activeTab === 'profile' && <ProfileScreen user={user} setUser={setUser} />}
           </>
         )}
       </View>
@@ -95,11 +92,11 @@ export default function App() {
             borderTopWidth: 1, 
             borderTopColor: '#e2e8f0', 
             flexDirection: 'row', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            paddingHorizontal: 8,
-            height: 80,
-            paddingBottom: 16
+            justifyContent: 'space-around', 
+            alignItems: 'flex-end', 
+            paddingHorizontal: 16,
+            height: 85,
+            paddingBottom: 20
           }}
         >
           <NavItem icon={Home} label="Inicio" id="dashboard" activeTab={activeTab} onPress={handleNavPress} />
@@ -108,24 +105,21 @@ export default function App() {
           <TouchableOpacity 
             onPress={() => setActiveTab('ai-coach')}
             style={{ 
-              flexDirection: 'column', 
               alignItems: 'center', 
               justifyContent: 'center', 
               backgroundColor: '#2563eb', 
-              borderRadius: 16, 
-              width: 56, 
-              height: 56, 
-              marginTop: -32,
-              minHeight: 56, 
-              minWidth: 56,
-              shadowColor: '#6366f1',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
+              borderRadius: 28, 
+              width: 60, 
+              height: 60, 
+              marginBottom: 20,
+              shadowColor: '#2563eb',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.4,
+              shadowRadius: 10,
+              elevation: 10,
             }}
           >
-            <Sparkles size={24} color="white" fill="white" />
+            <Sparkles size={28} color="white" fill="white" />
           </TouchableOpacity>
           
           <NavItem icon={BarChart3} label="Progreso" id="progress" activeTab={activeTab} onPress={handleNavPress} />

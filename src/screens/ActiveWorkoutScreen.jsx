@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet } from 'react-native';
 import { ArrowLeft, Clock, MoreVertical, Plus } from 'lucide-react-native';
 import { SetRow } from '../components/common/SetRow';
+import { RestTimer } from '../components/common/RestTimer';
 
 export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWorkout, setStats }) => {
+  const [showRestTimer, setShowRestTimer] = useState(false);
+  
   const handleFinish = () => {
     setActiveWorkout(null);
     setStats(prev => ({...prev, workoutsCompleted: prev.workoutsCompleted + 1}));
@@ -67,6 +70,15 @@ export const ActiveWorkoutScreen = ({ activeWorkout, setActiveTab, setActiveWork
               <SetRow index={1} prev="80kg x 10" weight="80" reps="10" isCompleted={false} />
               <SetRow index={2} prev="80kg x 9" weight="80" reps="10" isCompleted={false} />
             </View>
+
+            {showRestTimer && (
+              <View style={styles.restTimerContainer}>
+                <RestTimer 
+                  duration={90}
+                  onComplete={() => setShowRestTimer(false)}
+                />
+              </View>
+            )}
 
             <View style={styles.addSetContainer}>
               <TouchableOpacity style={styles.addSetButton}>
@@ -224,6 +236,9 @@ const styles = StyleSheet.create({
   },
   setsContainer: {
     gap: 4,
+  },
+  restTimerContainer: {
+    marginTop: 12,
   },
   addSetContainer: {
     marginTop: 16,
