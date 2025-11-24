@@ -455,6 +455,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 24,
+    paddingBottom: 40, // Añadido más padding para evitar que la barra de nav tape el botón
   },
   primaryButton: {
     flex: 1,

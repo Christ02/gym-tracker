@@ -16,7 +16,7 @@ import { supabase } from './src/services/supabase';
 
 export default function App() {
   // --- ESTADOS DE AUTENTICACIÓN ---
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(true); // Cambiado a true para saltar onboarding temporalmente
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
