@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, SafeAreaView, Platform, StatusBar, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Home, Dumbbell, BarChart3, User, Sparkles } from 'lucide-react-native';
+import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { ActiveWorkoutScreen } from './src/screens/ActiveWorkoutScreen';
@@ -13,6 +14,7 @@ import { NavItem } from './src/components/common/NavItem';
 
 export default function App() {
   // --- ESTADOS DE AUTENTICACIÓN ---
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [user, setUser] = useState(null);
   
   // --- ESTADOS DE LA APP ---
@@ -61,7 +63,12 @@ export default function App() {
       <StatusBar barStyle="dark-content" backgroundColor="#FAFAFA" />
       
       <View style={{ flex: 1 }}>
-        {!user ? (
+        {!hasSeenOnboarding ? (
+          <OnboardingScreen onComplete={(data) => {
+            setHasSeenOnboarding(true);
+            // Aquí puedes guardar los datos del onboarding
+          }} />
+        ) : !user ? (
           <AuthScreen setUser={setUser} />
         ) : (
           <>
