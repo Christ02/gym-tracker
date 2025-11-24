@@ -27,14 +27,18 @@ export const DashboardScreen = ({ user, startNewWorkout }) => {
 
   const todayRoutine = getTodayRoutine();
 
+  // Obtener el nombre del usuario (puede venir de userProfile o de user.user_metadata)
+  const userName = user?.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario';
+  const firstName = userName.split(' ')[0];
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hola, {user.name.split(' ')[0]}!</Text>
+          <Text style={styles.greeting}>Hola, {firstName}!</Text>
           <View style={styles.avatarContainer}>
             <Image 
-              source={{ uri: `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.name}` }} 
+              source={{ uri: `https://api.dicebear.com/9.x/avataaars/svg?seed=${userName}` }} 
               style={styles.avatar}
             />
           </View>

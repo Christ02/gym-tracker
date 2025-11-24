@@ -7,6 +7,10 @@ export const ProfileScreen = ({ user }) => {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
+  // Obtener datos del usuario de forma segura
+  const userName = user?.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario';
+  const userEmail = user?.email || 'email@ejemplo.com';
+
   const stats = [
     { label: 'Entrenamientos', value: '142', icon: Award, color: '#3b82f6' },
     { label: 'Días de Racha', value: '28', icon: Target, color: '#22c55e' },
@@ -51,15 +55,15 @@ export const ProfileScreen = ({ user }) => {
       <View style={styles.header}>
         <View style={styles.avatarLarge}>
           <Image 
-            source={{ uri: `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.name}` }} 
+            source={{ uri: `https://api.dicebear.com/9.x/avataaars/svg?seed=${userName}` }} 
             style={styles.avatarImage}
           />
         </View>
         <TouchableOpacity style={styles.editButton}>
           <Edit size={16} color="#3b82f6" />
         </TouchableOpacity>
-        <Text style={styles.userName}>{user.name}</Text>
-        <Text style={styles.userEmail}>{user.email}</Text>
+        <Text style={styles.userName}>{userName}</Text>
+        <Text style={styles.userEmail}>{userEmail}</Text>
         <View style={styles.badge}>
           <Award size={12} color="#f59e0b" fill="#fef3c7" />
           <Text style={styles.badgeText}>Miembro Activo</Text>

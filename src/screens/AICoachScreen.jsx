@@ -11,6 +11,10 @@ export const AICoachScreen = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef(null);
 
+  // Obtener datos del usuario de forma segura
+  const userName = user?.name || user?.user_metadata?.name || 'Usuario';
+  const userGoal = user?.goal || user?.user_metadata?.goal || 'fitness general';
+
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
@@ -25,7 +29,7 @@ export const AICoachScreen = ({ user }) => {
 
     const aiResponse = await callGeminiAPI(
       `Eres un entrenador personal experto y nutricionista deportivo amable y motivador. Responde de forma concisa (máximo 3 párrafos).
-       Contexto del usuario: Objetivo: ${user.goal}, Nombre: ${user.name}.
+       Contexto del usuario: Objetivo: ${userGoal}, Nombre: ${userName}.
        Pregunta del usuario: ${userMsg}`
     );
 
@@ -35,9 +39,9 @@ export const AICoachScreen = ({ user }) => {
 
   const handleQuickAction = (action) => {
     let prompt = "";
-    if (action === 'routine') prompt = `Crea una rutina de 30 minutos para ${user.goal} usando solo mancuernas. Dame lista de ejercicios.`;
-    if (action === 'diet') prompt = `Dame una idea de comida post-entreno alta en proteína para ${user.goal}.`;
-    if (action === 'tips') prompt = `Dame 3 consejos clave para mejorar en ${user.goal}.`;
+    if (action === 'routine') prompt = `Crea una rutina de 30 minutos para ${userGoal} usando solo mancuernas. Dame lista de ejercicios.`;
+    if (action === 'diet') prompt = `Dame una idea de comida post-entreno alta en proteína para ${userGoal}.`;
+    if (action === 'tips') prompt = `Dame 3 consejos clave para mejorar en ${userGoal}.`;
     
     setInputText(prompt);
   };
